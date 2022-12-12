@@ -1,0 +1,534 @@
+
+"""""""""" Configure Vundle
+set nocompatible
+filetype off 
+set rtp+=~/.vim/bundle/Vundle.vim/
+
+call vundle#begin()
+
+Plugin 'gmarik/vundle'
+Plugin 'rhysd/vim-clang-format'
+Plugin 'Rip-Rip/clang_complete'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'tpope/vim-fugitive'
+Plugin 'Lokaltog/vim-powerline'
+Plugin 'stephenmckinney/vim-solarized-powerline'
+Plugin 'Lokaltog/vim-easymotion'
+Plugin 'fholgado/minibufexpl.vim'
+Plugin 'wesleyche/SrcExpl'
+Plugin 'vim-scripts/L9'
+Plugin 'vim-scripts/FuzzyFinder'
+Plugin 'vim-scripts/molokai'
+Plugin 'vim-scripts/surround.vim'
+Plugin 'vim-scripts/taglist.vim'
+Plugin 'vim-scripts/Tagbar'
+Plugin 'vim-scripts/TaskList.vim'
+Plugin 'vim-scripts/DoxygenToolkit.vim'
+Plugin 'scrooloose/syntastic'
+Plugin 'scrooloose/nerdtree'
+Plugin 'scrooloose/nerdcommenter'
+Plugin 'mileszs/ack.vim'
+Plugin 'vimoutliner/vimoutliner'
+Plugin 'benmills/vimux'
+Plugin 'wincent/command-t'
+Plugin 'Shougo/neocomplete'
+Plugin 'Shougo/neosnippet'
+Plugin 'Shougo/neosnippet-snippets'
+Plugin 'altercation/vim-colors-solarized'
+
+call vundle#end()
+
+" Unbind the cursor keys in insert, normal and visual modes.
+for prefix in ['i', 'n', 'v']
+  for key in ['<Up>', '<Down>', '<Left>', '<Right>']
+      exe prefix . "noremap " . key . " <Nop>"
+  endfor
+endfor
+
+" Set color scheme.
+set background=dark
+colorscheme molokai
+"colorscheme ron
+"colorscheme xoria256
+"colorscheme solarized
+let g:Powerline_theme='short'
+let g:Powerline_colorscheme='solarized16_dark'
+
+hi Normal ctermbg=none 
+hi NonText ctermbg=none
+hi LineNr ctermbg=none
+hi SignColumn ctermbg=none 
+
+" Enable C++11 and Clang support for syntastic
+let g:syntastic_cpp_compiler = 'clang++'
+let g:syntastic_cpp_compiler_options = ' -std=c++11 -stdlib=libc++'
+
+let g:neocomplcache_enable_at_startup = 1
+
+
+" Plugin key-mappings.
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+xmap <C-k>     <Plug>(neosnippet_expand_target)
+
+" SuperTab like snippets behavior.
+imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+\ "\<Plug>(neosnippet_expand_or_jump)"
+\: pumvisible() ? "\<C-n>" : "\<TAB>"
+smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+\ "\<Plug>(neosnippet_expand_or_jump)"
+\: "\<TAB>"
+
+ " For snippet_complete marker.
+ if has('conceal')
+   set conceallevel=2 concealcursor=i
+   endif
+
+let g:clang_complete_auto = 1
+let g:clang_complete_copen = 1
+let g:clang_use_library = 1
+let g:clang_auto_select = 0
+let g:clang_complete_macros = 1
+let g:clang_complete_patterns = 1
+set completeopt=menu,longest
+let g:clang_library_path = '/usr/lib/llvm-3.5/lib/libclang-3.6.so.1'
+
+let g:clang_format#style_options = {
+            \ "AccessModifierOffset" : -4,
+            \ "AllowShortIfStatementsOnASingleLine" : "true",
+            \ "AlwaysBreakTemplateDeclarations" : "true",
+            \ "Standard" : "C++11"}
+
+let g:clang_format#command = "/usr/bin/clang-format-3.6"
+
+" map to <Leader>cf in C++ code
+autocmd FileType c,cpp,objc nnoremap <buffer><Leader>cf :<C-u>ClangFormat<CR>
+autocmd FileType c,cpp,objc vnoremap <buffer><Leader>cf :ClangFormat<CR>
+" if you install vim-operator-user
+autocmd FileType c,cpp,objc map <buffer><Leader>x <Plug>(operator-clang-format)
+" " Toggle auto formatting:
+nmap <Leader>C :ClangFormatAutoToggle<CR>
+
+"""""""""" General Vim
+" Open additional files without having to write changes to open files.
+set hidden
+
+" Enable full mouse support.
+set mouse=a
+
+" Disable error sound.
+set noerrorbells
+
+" Set the terminal title.
+set title
+
+" Disable the default 70s file-backup methods.
+set nobackup
+set noswapfile
+
+" Set history length.
+set history=1000
+
+" Set a larger undo history
+set undolevels=1000
+
+" Show current position.
+set ruler
+
+" Highlight search results.
+set hlsearch
+
+" Set extra options when running in GUI mode.
+if has("gui_running")
+    set guioptions-=T
+    set guioptions+=e
+    set t_Co=256
+    set guitablabel=%M\ %t
+endif
+
+" Set utf8 as standard encoding and en_US as the standard language.
+set encoding=utf8
+
+" Enable line-break arrow symbol
+set showbreak=↪
+
+" Use Unix as the standard file type.
+set ffs=unix,dos,mac
+
+" Always show the status line.
+set laststatus=2
+
+" Format the status line
+"set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+" Show info about current command.
+set showcmd
+
+"""""""""" File handling
+" Enable filetype detection based on file extension.
+filetype plugin on
+
+" Enable automatic indent based on file extension.
+filetype indent on
+
+" Gprof (gnu profiler)
+if getline(1) == 'Flat profile:' && getline(3) == '^Each sample counts as .* seconds.$'
+    setfiletype gprof
+endif
+
+"""""""""" Programming / IDE
+" Enable syntax highlighting.
+syntax on
+
+" Enable line numbers.
+set number
+
+" Auto-change from relative to absolute numbering
+autocmd InsertEnter * :set number
+autocmd InsertLeave * :set relativenumber
+
+" Show matching brackets on cursor-over.
+set showmatch
+
+" Enable code folding
+set foldmethod=syntax
+
+" Disable folding when files are opened
+set nofoldenable
+
+" Disable GitGutter on startup
+let g:gitgutter_override_sign_column_highlight = 0
+
+" Make sure NERDTREE runs automatically
+let NERDTreeShowBookmarks=1
+let g:NERDTreeWinSize=45
+autocmd VimEnter * NERDTree
+
+" But make sure focus is on the open buffer, not the NERDTRee window
+autocmd VimEnter * wincmd p
+
+" Make sure the tagbar is there where you need it.
+let g:tagbar_width=55
+autocmd VimEnter * nested :call tagbar#autoopen(1)
+"autocmd FileType * nested :call tagbar#autoopen(0)
+"autocmd BufEnter * nested :call tagbar#autoopen(0)
+
+" automatically open and close the popup menu / preview window
+au CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
+set completeopt+=menuone
+set completeopt+=menu
+set completeopt+=longest
+set completeopt+=preview
+
+" add highlighting for function definition in C++
+function! EnhanceCppSyntax()
+  syn match cppFuncDef "::\~\?\zs\h\w*\ze([^)]*\()\s*\(const\)\?\)\?$"
+  hi def link cppFuncDef Special
+endfunction
+autocmd Syntax cpp call EnhanceCppSyntax()
+
+"""""""""" Configure SrcExpl
+" // Set the height of Source Explorer window 
+let g:SrcExpl_winHeight = 8 
+
+" // Set 100 ms for refreshing the Source Explorer 
+let g:SrcExpl_refreshTime = 100 
+
+" // In order to avoid conflicts, the Source Explorer should know what plugins
+" // except itself are using buffers. And you need add their buffer names into
+" // below listaccording to the command ":buffers!"
+let g:SrcExpl_pluginList = [ 
+        \ "__Tag_List__", 
+        \ "_NERD_tree_" 
+    \ ] 
+
+" // Do not let the Source Explorer update the tags file when opening 
+let g:SrcExpl_isUpdateTags = 0 
+
+" // Use 'Exuberant Ctags' with '--sort=foldcase -R .' or '-L cscope.files' to 
+" // create/update the tags file 
+let g:SrcExpl_updateTagsCmd = "ctags --sort=foldcase -R ." 
+
+" // Set "<F12>" key for updating the tags file artificially 
+let g:SrcExpl_updateTagsKey = "<F12>" 
+
+"""""""""" Extended functionality
+" Turn backup off, since most stuff is in SVN, git et.c anyway...
+set nobackup
+set nowb
+set noswapfile
+
+" Set to auto read when a file is changed from the outside
+set autoread
+
+" Enable the wild menu.
+" set wildmenu" enables a menu at the bottom of the vim/gvim window.
+" The meaning of "list:longest,full" is so that when you do completion in the command line via tab, these events will happen:
+" 1. (on the first tab) a list of completions will be shown and the command will be completed to the longest common command.
+" 2. (on second tab) the wildmenu will show up with all the completions that were listed before.
+" To test it out, type ":spe" and then hit tab once to see 1 and hit tab again to see 2.
+set wildmenu
+set wildmode=list:longest,full
+
+" Ignore compiled files
+set wildignore=*.o,*~,*.pyc
+
+set ofu=syntaxcomplete#Complete
+
+" Enable incremental search.
+set incsearch
+
+" Return to last edit position when opening files (You want this!)
+autocmd BufReadPost *
+     \ if line("'\"") > 0 && line("'\"") <= line("$") |
+     \   exe "normal! g`\"" |
+     \ endif
+
+" Remember info about open buffers on close
+set viminfo^=%
+
+" Delete trailing white space on save, useful for Python and CoffeeScript ;)
+func! DeleteTrailingWS()
+    exe "normal mz"
+    %s/\s\+$//ge
+    exe "normal `z"
+endfunc
+autocmd BufWrite *.py :call DeleteTrailingWS()
+autocmd BufWrite *.coffee :call DeleteTrailingWS()
+
+"""""""""" Tabbing
+" Use spaces instead of tabs.
+set expandtab
+
+" Be smart when using tabs ;)
+set smarttab
+
+" 1 tabs = 4 spaces.
+set shiftwidth=2
+set tabstop=2
+
+" Linebreak on 80 characters
+set lbr
+set tw=80
+
+"Auto indent
+set ai 
+
+"Smart indent
+set si 
+
+"Wrap lines
+set wrap
+
+"Stop latex from "concealing" maths and replacing it with symbols
+let g:tex_conceal = ""
+set conceallevel=0
+
+"""""""""" Key bindings
+
+" V: [g], [v] --> Vim: Vimgrep the selected text.
+vnoremap <silent> gv :call VisualSelection('gv')<CR>
+
+" I: [j], [k] --> Vim: exit insert mode.
+inoremap jk <ESC>
+
+" C: [j] --> move to next ROW below, not next LINE (better for wrapped lines).
+nnoremap j gj
+
+" C: [k] --> move to next ROW above, not next LINE (better for wrapped lines).
+nnoremap k gk
+
+" C: [T] --> TaskList: Open the TaskList pane.
+noremap T :TaskList<CR>
+
+" C: [0] --> Vim: Remap 0 to first non-blank character
+noremap 0 ^
+
+" C: [[] --> MiniBuff Explorer: Cycle to next buffer on the left.
+noremap [ :MBEbp<CR>
+
+" C: []] --> MiniBuff Explorer: Cycle to next buffer on the right.
+noremap ] :MBEbn<CR>
+
+" C: [F3] --> Toggle NERDTree file manager pane.
+noremap <F1> :NERDTreeToggle<CR>
+
+" C: [F2] --> Toggle GitGutter
+noremap <F2> :GitGutterToggle<CR>
+
+" C: [F2] --> Vim: Toggle line-numbers and code folding.
+noremap <F3> :set nonumber!<CR>:set foldcolumn=0<CR>
+
+" C: [F4] --> Toggle the TagBar pane.
+noremap <F4> :TagbarToggle<CR>
+
+" C: [F5] --> Toggle the Source Explorer 
+nnoremap <F5> :SrcExplToggle<CR> 
+
+" C: [F6] --> Vim: Switch between foo.cpp and foo.h
+noremap <F6> :e %:p:s,.h$,.X123X,:s,.cpp$,.h,:s,.X123X$,.cpp,<CR>
+
+" C: [space] --> Vim: Search.
+noremap <space> /
+
+" C: [:] --> ; (saves having to press shift each time)
+nnoremap ; :
+nnoremap : ;
+
+"""""""""" Key bindings (ctrl)
+
+" C: [ctrl] + [h] --> Vim: Go down one window.
+map <C-h> <C-W>h
+
+" C: [ctrl] + [j] --> Vim: Go left one window.
+map <C-j> <C-W>j
+
+" C: [ctrl] + [k] --> Vim: Go up one window.
+map <C-k> <C-W>k
+
+" C: [ctrl] + [l] --> Vim: Go right one window.
+map <C-l> <C-W>l
+
+" C: [ctrl] + [n] --> Vim: Toggle absolute/relative line numbers.
+
+nnoremap <C-n> :call NumberToggle()<cr>
+
+" C: [ctrl] + [space] --> Vim: Backwards search.
+map <C-space> ?
+
+" C: [ctrl] + [\] --> c.vim: Open function definiiton in new tab
+map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
+
+" C: [ctrl] + [F12} --> ctags: Build tags of your own project.
+map <C-F12> :!ctags -R --sort=yes --c++-kinds=+lp --fields=+iaS --extra=+q .<CR>
+
+"""""""""" Key bindings (alt)
+
+" C: [alt] + []] --> Opens a new tab with the current buffer's path
+map <A-]> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
+
+"""""""""" Key bindings (leader)
+
+" C/V: [,] --> Vim: Leader key.
+let mapleader=","
+
+" C: [leader], [g] --> Vim: Open vimgrep and put the cursor in the right position
+map <leader>g :vimgrep // **.<left><left><left><left><left><left><left>
+
+" C: [leader], [p], [p] --> Vim: Toggle paste mode on and off
+map <leader>pp :setlocal paste!<cr>
+
+" V: [leader], [r] --> Vim: Search and replace the selected text.
+vnoremap <silent> <leader>r :call VisualSelection('replace')<CR>
+
+" C: [leader], [s], [s] --> Vim: Toggle and untoggle spell checking.
+map <leader>ss :setlocal spell!<cr>
+
+" C: [leader], [t], [e] --> Vim: Super useful when editing files in the same directory
+map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
+
+" C: [leader], [q] --> Vim: Fast quit.
+nmap <leader>q :q!<cr>
+
+" C: [leader], [w] --> Vim: Fast save.
+nmap <leader>w w!<cr>
+
+" C: [leader], [space] --> Vim: Vimgreps in the current file
+map <leader><space> :vimgrep // <C-R>%<C-A><right><right><right><right><right><right><right><right><right>
+
+" C: [leader], [/] --> clear highlighted search results
+nmap <silent> <leader>/ :nohlsearch<CR>
+
+"""""""""" Unsorted/Broken Keybindings
+
+nmap <M-k> mz:m-2<cr>`z
+vmap <M-j> :m'>+<cr>`<my`>mzgv`yo`z
+vmap <M-k> :m'<-2<cr>`>my`<mzgv`yo`z
+
+" Allows you to do w!! to save when you forget to open with sudo.
+cmap w!! w !sudo tee % >/dev/null
+
+" Do :help cope if you are unsure what cope is. It's super useful!
+"
+" When you search with vimgrep, display your results in cope by doing:
+"   <leader>cc
+"
+" To go to the next search result do:
+"   <leader>n
+"
+" To go to the previous search results do:
+"   <leader>p
+"
+map <leader>cc :botright cope<cr>
+map <leader>co ggVGy:tabnew<cr>:set syntax=qf<cr>pgg
+map <leader>n :cn<cr>
+map <leader>p :cp<cr>
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""" Helper functions
+function! CmdLine(str)
+    exe "menu Foo.Bar :" . a:str
+    emenu Foo.Bar
+    unmenu Foo
+endfunction
+
+function! VisualSelection(direction) range
+    let l:saved_reg = @"
+    execute "normal! vgvy"
+
+    let l:pattern = escape(@", '\\/.*$^~[]')
+    let l:pattern = substitute(l:pattern, "\n$", "", "")
+
+    if a:direction == 'b'
+        execute "normal ?" . l:pattern . "^M"
+    elseif a:direction == 'gv'
+        call CmdLine("vimgrep " . '/'. l:pattern . '/' . ' **.')
+    elseif a:direction == 'replace'
+        call CmdLine("%s" . '/'. l:pattern . '/')
+    elseif a:direction == 'f'
+        execute "normal /" . l:pattern . "^M"
+    endif
+
+    let @/ = l:pattern
+    let @" = l:saved_reg
+endfunction
+
+" Returns true if paste mode is enabled
+function! HasPaste()
+    if &paste
+        return 'PASTE MODE  '
+    en
+    return ''
+endfunction
+
+" Don't close window, when deleting a buffer
+command! Bclose call <SID>BufcloseCloseIt()
+function! <SID>BufcloseCloseIt()
+   let l:currentBufNum = bufnr("%")
+   let l:alternateBufNum = bufnr("#")
+
+   if buflisted(l:alternateBufNum)
+     buffer #
+   else
+     bnext
+   endif
+
+   if bufnr("%") == l:currentBufNum
+     new
+   endif
+
+   if buflisted(l:currentBufNum)
+     execute("bdelete! ".l:currentBufNum)
+   endif
+endfunction
+
+function! NumberToggle()
+  if(&relativenumber == 1)
+    set number
+  else
+    set relativenumber
+  endif
+endfunction
